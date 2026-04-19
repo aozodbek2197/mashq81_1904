@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>31. Notes App</title>
+  <style>
+    body { font-family: Arial; background: #f4f4f4; padding: 20px; }
+    .container { max-width: 800px; margin: auto; background: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); overflow: hidden; }
+    .header { padding: 20px; background: #2c3e50; color: white; display: flex; justify-content: space-between; align-items: center; }
+    input, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
+    button { padding: 10px 20px; background: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    .notes { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; padding: 20px; }
+    .note { background: #fff9c4; padding: 15px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); position: relative; }
+    .note h3 { margin: 0 0 10px 0; }
+    .delete { position: absolute; top: 10px; right: 10px; color: red; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>Eslatmalar</h2>
+      <input type="text" id="search" placeholder="Qidirish..." onkeyup="filterNotes()">
+    </div>
+    
+    <div style="padding:20px;">
+      <input type="text" id="title" placeholder="Sarlavha">
+      <textarea id="content" rows="4" placeholder="Matnni yozing..."></textarea>
+      <button onclick="addNote()">Saqlash</button>
+    </div>
+
+    <div class="notes" id="notes"></div>
+  </div>
+
+  <script>
+    let notes = JSON.parse(localStorage.getItem('notes')) || [];
+
+    function renderNotes(filteredNotes = notes) {
+      const container = document.getElementById('notes');
+      container.innerHTML = '';
+      filteredNotes.forEach((note, index) => {
+        const div = document.createElement('div');
+        div.className = 'note';
+        div.innerHTML = `
+          <h3>${note.title}</h3>
+          <p>${note.content}</p>
+          <span class="delete" onclick="deleteNote(${index})">✕</span>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addNote() {
+      const title = document.getElementById('title').value.trim();
+      const content = document.getElementById('content').value.trim();
+      if (!title || !content) return alert("Sarlavha va matnni to‘ldiring!");
+
+      notes.unshift({ title, content, date: new Date().toLocaleDateString() });
+      localStorage.setItem('notes', JSON.stringify(notes));
+      renderNotes();
+      
+      document.getElementById('title').value = '';
+      document.getElementById('content').value = '';
+    }
+
+    function deleteNote(index) {
+      notes.splice(index, 1);
+      localStorage.setItem('notes', JSON.stringify(notes));
+      renderNotes();
+    }
+
+    function filterNotes() {
+      const term = document.getElementById('search').value.toLowerCase();
+      const filtered = notes.filter(note => 
+        note.title.toLowerCase().includes(term) || 
+        note.content.toLowerCase().includes(term)
+      );
+      renderNotes(filtered);
+    }
+
+    renderNotes();
+  </script>
+</body>
+</html>
